@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Louis Philippe - Express Sale Campaign</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #2a2a2a;
+            color: white;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        /* Noisy background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 100, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 120, 150, 0.1) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.05"/></svg>');
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .back-to-work {
+            display: flex;
+            align-items: center;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-work:hover {
+            color: white;
+        }
+
+        .back-to-work::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: white;
+        }
+
+        .contact-link::after {
+            content: '↗';
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        /* Main content */
+        .main-content {
+            position: relative;
+            z-index: 2;
+            padding-top: 80px;
+        }
+
+        /* Hero section */
+        .hero-section {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            width: max-content; /* Allow section to expand beyond viewport */
+            min-width: 100vw; /* Ensure it's at least full viewport width */
+        }
+
+        .hero-left {
+            flex-shrink: 0; /* Prevent shrinking */
+            padding: 60px;
+            width: 40vw; /* Fixed width instead of flex: 1 */
+            min-width: 400px; /* Minimum width for text section */
+        }
+
+        .campaign-theme {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .hero-title {
+            font-size: clamp(60px, 7vw, 120px);
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        /* Page frame for horizontal scrolling */
+        .page_frame {
+            height: 100vh;
+            width: 100vw;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: auto;
+            -webkit-overflow-scrolling: touch;
+            cursor: grab;
+            position: relative;
+        }
+        
+        .page_frame:active {
+            cursor: grabbing;
+        }
+
+        /* Horizontal scroll gallery */
+        .gallery-container {
+            display: flex;
+            height: 100vh;
+            width: auto; /* Changed from max-content */
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .gallery-scroll {
+            display: flex;
+            height: 100%;
+            gap: 20px;
+            padding: 60px 20px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .gallery-item {
+            min-width: 400px;
+            height: calc(100vh - 120px);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #1a1a1a;
+            flex-shrink: 0;
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .gallery-item video {
+            cursor: pointer;
+        }
+
+        /* Hide scrollbar for desktop/laptop while maintaining scroll functionality */
+        .page_frame::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+        }
+        
+        .page_frame {
+            -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+            scrollbar-width: none;  /* Hide scrollbar for Firefox */
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            html {
+                overflow: auto;
+            }
+            
+            body {
+                overflow: auto;
+                height: auto;
+            }
+
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+                position: relative;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .nav-menu {
+                gap: 20px;
+                font-size: 14px;
+            }
+
+            .page_frame {
+                height: auto;
+                overflow: visible;
+            }
+
+            .hero-section {
+                flex-direction: column;
+                min-height: auto;
+                height: auto;
+            }
+
+            .hero-left {
+                max-width: 100%;
+                padding: 30px 20px;
+                text-align: center;
+                position: relative;
+                z-index: 10;
+            }
+
+            .campaign-theme {
+                font-size: 14px;
+            }
+
+            .hero-title {
+                font-size: clamp(40px, 12vw, 80px);
+                margin-bottom: 30px;
+            }
+
+            /* Vertical scroll for mobile */
+            .gallery-container {
+                height: auto;
+                width: 100%;
+                flex-direction: column;
+                overflow: visible;
+            }
+
+            .gallery-scroll {
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .gallery-item {
+                min-width: auto;
+                width: 100%;
+                height: 60vh;
+                min-height: 300px;
+                flex-shrink: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .hero-left {
+                padding: 20px 15px;
+            }
+
+            .gallery-scroll {
+                padding: 15px;
+            }
+
+            .gallery-item {
+                height: 50vh;
+                min-height: 250px;
+            }
+        }
+
+        /* Smooth scrolling */
+        .gallery-container {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading animation */
+        .gallery-item {
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .gallery-item img.loaded,
+        .gallery-item video.loaded {
+            opacity: 1;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">MG</div>
+        <a href="../../../work.html" class="back-to-work">Back to Work</a>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="../../../work.html">Work</a></li>
+                <li><a href="../../../about.html">About</a></li>
+                <li><a href="../../../contact.html" class="contact-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main data-horizontal-page="" class="page_main">
+        <div class="page_frame" id="pageFrame">
+            <section class="hero-section">
+                <!-- Left side with text -->
+                <div class="hero-left">
+                    <p class="campaign-theme">Campaign Theme</p>
+                    <h1 class="hero-title">Express<br>Sale</h1>
+                </div>
+
+                <!-- Right side with horizontal scrolling gallery -->
+                <div class="gallery-container" id="gallery">
+                    <div class="gallery-scroll">
+                    <!-- Images -->
+                    <div class="gallery-item">
+                        <img src="assets/B1G30,-B2G40_-Formalwear.jpg" alt="Formal Wear Campaign" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Blazer_banner.jpg" alt="Blazer Banner" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Carnival 1.png" alt="Carnival Campaign 1" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Carnival 2.png" alt="Carnival Campaign 2" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Carnival 3.png" alt="Carnival Campaign 3" loading="lazy">
+                    </div>
+                    
+                    <!-- Videos -->
+                    <div class="gallery-item">
+                        <video controls preload="metadata">
+                            <source src="assets/EOSS_Reel 02.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="gallery-item">
+                        <video controls preload="metadata">
+                            <source src="assets/EOSS_Reel 03.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="gallery-item">
+                        <video controls preload="metadata">
+                            <source src="assets/LP_Launch Reel Revised V3.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    
+                    <!-- More Images -->
+                    <div class="gallery-item">
+                        <img src="assets/Carnival 4.png" alt="Carnival Campaign 4" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Carnival 5.png" alt="Carnival Campaign 5" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Fathersday.png" alt="Father's Day Campaign" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Flat40_Formal-Shoes_Banner-b.jpg" alt="Formal Shoes Banner" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/FTOS_CASUAL-WEAR.jpg" alt="Casual Wear" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Masai 1.png" alt="Masai Campaign 1" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Masai 2.png" alt="Masai Campaign 2" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Masai 3.png" alt="Masai Campaign 3" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Masai 4.png" alt="Masai Campaign 4" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Masai 5.png" alt="Masai Campaign 5" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/Mothers-Day.png" alt="Mother's Day Campaign" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/STILL-1.jpg" alt="Still Image 1" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/STILL-2.jpg" alt="Still Image 2" loading="lazy">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/STILL-3.jpg" alt="Still Image 3" loading="lazy">
+                    </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Image loading animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.gallery-item img');
+            const videos = document.querySelectorAll('.gallery-item video');
+            
+            images.forEach(img => {
+                img.addEventListener('load', function() {
+                    this.classList.add('loaded');
+                });
+                
+                if (img.complete) {
+                    img.classList.add('loaded');
+                }
+            });
+            
+            videos.forEach(video => {
+                video.addEventListener('loadeddata', function() {
+                    this.classList.add('loaded');
+                });
+            });
+
+            // Initialize horizontal scroll after DOM is loaded
+            initHorizontalScroll();
+        });
+
+        function initHorizontalScroll() {
+            const pageFrame = document.getElementById('pageFrame');
+            if (!pageFrame) return;
+            
+            // Convert vertical scroll to horizontal scroll on desktop
+            function handleWheelScroll(e) {
+                if (window.innerWidth > 768) {
+                    // Check if there's content to scroll
+                    const hasHorizontalScroll = pageFrame.scrollWidth > pageFrame.clientWidth;
+                    
+                    if (hasHorizontalScroll) {
+                        e.preventDefault();
+                        
+                        // Get the scroll amount (deltaY is the vertical scroll)
+                        const scrollAmount = e.deltaY;
+                        
+                        // Apply horizontal scrolling
+                        pageFrame.scrollLeft += scrollAmount;
+                    }
+                }
+            }
+            
+            // Touch/swipe support for horizontal scrolling
+            let isDown = false;
+            let startX;
+            let scrollLeftStart;
+
+            pageFrame.addEventListener('mousedown', (e) => {
+                if (window.innerWidth > 768) {
+                    isDown = true;
+                    pageFrame.style.cursor = 'grabbing';
+                    startX = e.pageX - pageFrame.offsetLeft;
+                    scrollLeftStart = pageFrame.scrollLeft;
+                }
+            });
+
+            pageFrame.addEventListener('mouseleave', () => {
+                isDown = false;
+                if (window.innerWidth > 768) {
+                    pageFrame.style.cursor = 'grab';
+                }
+            });
+
+            pageFrame.addEventListener('mouseup', () => {
+                isDown = false;
+                if (window.innerWidth > 768) {
+                    pageFrame.style.cursor = 'grab';
+                }
+            });
+
+            pageFrame.addEventListener('mousemove', (e) => {
+                if (!isDown || window.innerWidth <= 768) return;
+                e.preventDefault();
+                const x = e.pageX - pageFrame.offsetLeft;
+                const walk = (x - startX) * 2;
+                pageFrame.scrollLeft = scrollLeftStart - walk;
+            });
+
+            // Keyboard navigation for desktop only
+            document.addEventListener('keydown', function(e) {
+                if (window.innerWidth > 768) {
+                    if (e.key === 'ArrowLeft') {
+                        pageFrame.scrollBy({ left: -420, behavior: 'smooth' });
+                    } else if (e.key === 'ArrowRight') {
+                        pageFrame.scrollBy({ left: 420, behavior: 'smooth' });
+                    }
+                }
+            });
+
+            // Handle window resize and wheel event management
+            function handleResize() {
+                if (window.innerWidth <= 768) {
+                    pageFrame.style.overflowX = 'visible';
+                    pageFrame.style.overflowY = 'visible';
+                    pageFrame.style.cursor = 'default';
+                    // Remove wheel listener on mobile
+                    document.removeEventListener('wheel', handleWheelScroll);
+                } else {
+                    pageFrame.style.overflowX = 'auto';
+                    pageFrame.style.overflowY = 'hidden';
+                    pageFrame.style.cursor = 'grab';
+                    // Add wheel listener for desktop horizontal scrolling
+                    document.removeEventListener('wheel', handleWheelScroll); // Remove first to avoid duplicates
+                    document.addEventListener('wheel', handleWheelScroll, { passive: false });
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Initial setup
+            handleResize();
+        }
+    </script>
+</body>
+</html>
